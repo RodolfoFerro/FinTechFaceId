@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Py cosas</title>
+	<link rel="stylesheet" href="/public/bootstrap.css">
+</head>
+<body>
+
+<div class="container">
+	<div class="row">
+
+		<div class="jumbotron display-1">
+		  <h2>Clientes <button class="btn btn-primary btn-1" data-toggle="modal" data-target="#myModal">Agrear</button></h2>
+		  <table class="table striped-hover lista-clientes">
+		  </table>
+		</div>
+
+	</div>
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Nuevo cliente</h4>
+	      </div>
+	      <div class="modal-body">
+	      	<input type="text" class="form-control campo-nombre" placeholder="Nombre">
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+	        <button type="button" class="btn btn-primary guardar-cliente">Guardar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/jquery.min.js"></script>
+<script src="/public/bootstrap.min.js"></script>
+<script>
+var socket = io();
+
+$(document).ready(function(){
+	// $('.btn-1').click(function(){
+	// 	socket.emit('exec', 'now');
+	// });
+
+	socket.on('changeDisplay', function(msg){
+		$('.display-1').fadeOut('fast');
+		$('.display-2').fadeIn('fast');
+	});
+	socket.on('changeRoll', function(msg){
+		listar();
+	});
+	// agregar cliente
+	$('.guardar-cliente').click(function(){
+		var nombre = document.querySelector('.campo-nombre').value;
+		$.post( "/guardar-cliente", { nombre: nombre}, function(respuesta){
+			if(respuesta == 'ok'){
+				$('#myModal').modal('hide');
+				listar();
+			}
+		});
+	});
+
+	// listar clientes
+	function listar(){
+		$.post( "/listar-clientes", function(respuesta){
+			$('.lista-clientes').empty();
+		  $('.lista-clientes').append('<tr><th>Id</th><th>Nombre</th><th>Nº Tarjeta</th></tr><tr></tr>');
+		  console.log(respuesta);
+			respuesta.forEach(function(cliente, index){
+				if(cliente.enrolado){
+					var enrolado = '<button class="btn btn-success">Enrolado</button>';
+				}else{
+					var enrolado = '<button class="btn btn-primary enrolar" id="'+index+'">Enrolar</button>';
+				}
+				$('.lista-clientes').append('<tr><td>'+(index + 1)+'</td><td>'+cliente.nombre+'</td><td>'+cliente.tarjeta+'</td><td>'+enrolado+'</td></tr>');
+			});
+		});
+	}
+	listar();
+	$('.lista-clientes').on('click', '.enrolar', function(){
+		var id = $(this).attr("id");
+		$.post( "/validate", { id: id}, function(respuesta){
+			if(respuesta == 'ok'){
+				$('#myModal').modal('hide');
+				listar();
+			}
+		});
+	});
+
+});
+</script>
+</body>
+</html>

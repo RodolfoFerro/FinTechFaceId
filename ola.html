@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Py cosas</title>
+	<link rel="stylesheet" href="/public/bootstrap.css">
+</head>
+<body>
+
+<div class="container">
+	<div class="row">
+		<div class="jumbotron display-1 text-center">
+		   <img src="/public/logo.png" width="40%">
+		  <h1>BIENVENIDO</h1>
+		  <p>Posiciónate frente a la cámara y mantente quieto en lo que detectamos tu rostro.</p>
+		  <p><button class="btn btn-success btn-1">ACCEDER</button></p>
+		</div>
+
+		<div class="jumbotron display-2 text-center" style="display:none;">
+			<img src="/public/logo.png" width="300">
+		  <h1>ACCESO CONCEDIDO</h1>
+		  <p>Bienvenido a tu cuenta bancaria.</p>
+		  <p><button class="btn btn-warning exit">Salir</button></p>
+		</div>
+
+	</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/jquery.min.js"></script>
+<script>
+	var socket = io();
+
+	$('.btn-1').click(function(){
+		socket.emit('validarPaps', 'now');
+	});
+
+	socket.on('hay', function(msg){
+		console.log('verify');
+		$('.display-1').fadeOut('fast');
+		$('.display-2').fadeIn('fast');
+	});
+
+</script>
+</body>
+</html>
